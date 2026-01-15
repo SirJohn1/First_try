@@ -2,28 +2,23 @@ using UnityEngine;
 
 public class GameInput : MonoBehaviour
 {
+    private PlayerInputActions inputActions;
+
+    private void Awake() 
+    {
+        inputActions = new PlayerInputActions();
+        inputActions.Player.Enable();
+    }
+
+
+
+
     public Vector2 GetMovementVectorMormalize()
     {
-        Vector2 inputVector = new Vector2(0, 0);
+        Vector2 inputVector = inputActions.Player.Move.ReadValue<Vector2>();
 
         //GetKey - удержание клавиши
         //GetKeyDown - отпускание клавиши
-        if (Input.GetKey(KeyCode.W))
-        {
-            inputVector.y += 1;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            inputVector.y -= 1;
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            inputVector.x -= 1;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            inputVector.x += 1;
-        }
 
         inputVector = inputVector.normalized;
 
