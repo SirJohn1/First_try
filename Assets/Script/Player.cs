@@ -5,8 +5,17 @@ public class Player : MonoBehaviour
     [SerializeField]
     GameInput gameInput;
 
+
     [SerializeField]
     private float speed = 10f;
+
+
+    //.............................................................
+    [SerializeField]
+    private float runSpeed = 1.6f;
+    //.............................................................
+
+
 
     [SerializeField]
     private float rotationSpeed = 10f;
@@ -14,6 +23,12 @@ public class Player : MonoBehaviour
     private Vector3 lastInteractionDir;
 
     public bool IsWalking { get; private set; }
+
+
+    //.............................................................
+    public bool IsRunning { get; private set; }
+    //.............................................................
+
 
     private void Update()
     {
@@ -23,7 +38,7 @@ public class Player : MonoBehaviour
 
     private void HandleInteractions()
     {
-        Vector2 inputVector = gameInput.GetMovementVectorMormalize();
+        Vector2 inputVector = gameInput.GetMovementVectorNormalize();
 
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
@@ -52,13 +67,25 @@ public class Player : MonoBehaviour
 
     private void HandelMovement()
     {
-        Vector2 inputVector = gameInput.GetMovementVectorMormalize();
+        Vector2 inputVector = gameInput.GetMovementVectorNormalize();
 
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+
+        IsRunning = gameInput.IsRunning && moveDir != Vector3.zero;
+
+        //.............................................................
+        float currentSpeed = speed; // текущая скорость
+        if (IsRunning)
+        {
+            currentSpeed = speed * runSpeed; //бег
+        }
+        //.............................................................
+
+
         float playerRadius = 0.7f;
         float playerHeught = 2f;
 
-        float moveDistance = speed * Time.deltaTime;
+        float moveDistance = currentSpeed * Time.deltaTime;
         bool canMove = !Physics.CapsuleCast(transform.position,
             transform.position + Vector3.up * playerHeught, playerRadius,
             moveDir, moveDistance);
@@ -93,10 +120,13 @@ public class Player : MonoBehaviour
 
         if (canMove)
         {
-            transform.position += speed * moveDir * Time.deltaTime;
+            transform.position += currentSpeed * moveDir * Time.deltaTime;
         }
 
+        if (moveDir != Vector3.zero)
+        {
+            transform.forward = Vector3.Slerp(transform.forward, moveDir, rotationSpeed * Time.deltaTime);
 
-        transform.forward = Vector3.Slerp(transform.forward, moveDir, rotationSpeed * Time.deltaTime);
+        }
     }
 }
