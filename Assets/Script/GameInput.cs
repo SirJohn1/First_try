@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GameInput : MonoBehaviour
 {
-    
+    public event EventHandler OnInteractAction;
 
     private PlayerInputActions inputActions;
 
@@ -19,13 +19,18 @@ public class GameInput : MonoBehaviour
         inputActions = new PlayerInputActions();
         inputActions.Player.Enable();
 
+        inputActions.Player.Interact.performed += Interact_performed;
+
         //.............................................................
         inputActions.Player.Sprint.performed += context => isRunning = true;
         inputActions.Player.Sprint.canceled += context => isRunning = false;
         //.............................................................
     }
 
-
+    private void Interact_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnInteractAction?.Invoke(this, EventArgs.Empty);
+    }
 
     public Vector2 GetMovementVectorNormalize()
     {
