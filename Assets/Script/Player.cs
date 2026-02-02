@@ -1,10 +1,37 @@
+using System;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+
+    public static Player Instance { get; private set; }
+
+
+
+    private void Awake()
+    {
+        Instance = this;
+        if (Instance == null)
+        {
+            Debug.LogError("На уровне больше 1 игрока");
+        }
+
+        
+    }
+
+
+
+    public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
+
+    public class OnSelectedCounterChangedEventArgs : EventArgs
+    {
+        public ClearCounter selectedCounter; 
+    }
+
     [SerializeField]
     GameInput gameInput;
 
+    private ClearCounter selectedCounter;
 
     [SerializeField]
     private float speed = 10f;
@@ -38,7 +65,7 @@ public class Player : MonoBehaviour
     private void Update()
     {
         HandelMovement();
-        //HandleInteractions();
+        HandleInteractions();
     }
 
     private void HandleInteractions()
@@ -52,21 +79,27 @@ public class Player : MonoBehaviour
             lastInteractionDir = moveDir;
         }
 
-
         float interactDistance = 2f;
         if (Physics.Raycast(transform.position, lastInteractionDir,
             out RaycastHit raycastHit, interactDistance))
         {
             if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
             {
-                clearCounter.Interact();
+                if (clearCounter != selectedCounter)
+                {                   
+                    SetSelectedCounter(clearCounter);
+                }
             }
-            else
+            else 
             {
-                Debug.Log(raycastHit.transform);
-            }
+                SetSelectedCounter(null);                
+            }        
         }
-        
+        else
+        {
+            SetSelectedCounter(null);
+        }
+
 
     }
 
@@ -138,31 +171,19 @@ public class Player : MonoBehaviour
 
     private void GameInput_OnInteractAction(object sender, System.EventArgs e)
     {
-        Vector2 inputVector = gameInput.GetMovementVectorNormalize();
-
-        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
-
-        if (moveDir != Vector3.zero)
+        if (selectedCounter != null)
         {
-            lastInteractionDir = moveDir;
-        }
-
-
-        float interactDistance = 2f;
-        if (Physics.Raycast(transform.position, lastInteractionDir,
-            out RaycastHit raycastHit, interactDistance))
-        {
-            if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
-            {
-                clearCounter.Interact();
-            }
-            else
-            {
-                Debug.Log(raycastHit.transform);
-            }
+            selectedCounter.Interact();
         }
     }
 
+    private void SetSelectedCounter(ClearCounter selectedCounter)
+    {
+        this.selectedCounter = selectedCounter;
 
+        OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs
+        {
+            selectedCounter = this.selectedCounter
+        });
+    }
 }
-
