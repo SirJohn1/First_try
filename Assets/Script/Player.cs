@@ -58,10 +58,10 @@ public class Player : MonoBehaviour
     private void Start()
     {
         gameInput.OnInteractAction += GameInput_OnInteractAction;
+       
     }
 
     
-
     private void Update()
     {
         HandelMovement();
@@ -177,9 +177,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void SetSelectedCounter(ClearCounter selectedCounter)
+    private void SetSelectedCounter(ClearCounter clearCounter)
     {
-        this.selectedCounter = selectedCounter;
+        selectedCounter = clearCounter;
 
         OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs
         {
